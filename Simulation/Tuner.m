@@ -145,6 +145,7 @@ sys_q = ss(A, B(:,2), C_q, D_q);
 figure;
 K =64.5;
 rlocus(-K*sys_q);
+
 % %% Verifying linear model
 % t_end = 50;
 % t = linspace(0,t_end, t_end/0.1+1);

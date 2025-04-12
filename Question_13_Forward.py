@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 #------------------------- QUESTION 1.3 FORWARD FLIGHT  -------------------------
 
 def Pind(k, T, vi):
-    return k*T*vi
+    return k*T*vi   
 
 # Profile power and drag 
 def Pprofile(sigma, cdp, rho, R, omega, mu):
@@ -64,12 +64,11 @@ P_t = []
 
 for i in np.arange(0, len(V)):
     # MAIN ROTOR PARAMETERS
-    lt = 12.825 # [m] Distance between rotor and tail rotor
+    lt = 7.901 # [m] Distance between rotor and tail rotor
     
     viff = vi_bar[i][0]*induced_hover(W, rho0, R)
     k = 1.15
     CdS = 2.415 # [m^2] Graphically determined 
-    k = 1.15
     CDp = 0.01 # [-] Graphically determined 
     sigma = N*c/(np.pi*R)
     mu = V[i]/(rotor_speed*R)
@@ -91,7 +90,7 @@ for i in np.arange(0, len(V)):
     vit = induced_hover(T, rho0, Rt)
 
     # Tail rotor power
-    P_tail = tailrotor_power(kt, T, vit, rho0, Rt, sigmat, CDf, rotor_speed_t, mut)
+    P_tail = tailrotor_power(kt, T, vit, rho0, Rt, sigmat, CDp, rotor_speed_t, mut)
 
     # Total power
     P_tot.append((P_rotor+P_tail)/10**6) 
@@ -121,26 +120,43 @@ P_best_range = P_tot[best_idx]
 slope = P_best_range / V_best_range
 line = slope * V  # y = mx
 
+
+plt.plot(V, P_tot, color = 'black', label = 'Total Power')
+plt.plot(V, P_ind, color = '#D81B60', linestyle = '--', label = 'Induced Power')
+plt.plot(V, P_profile, color = '#FFB000', linestyle = '--', label = 'Profile Power')
+plt.plot(V, P_parasite, color = '#785EF0', linestyle = '--', label = 'Parasite Power')
+plt.plot(V, P_t, color = 'purple', linestyle = '--', label = 'Tail Rotor Power')
+plt.legend()
+plt.xlabel('Forward Velocity [m/s]')
+plt.ylabel('Power [MW]')
+plt.grid()
+plt.show()
+
 fig, axs = plt.subplots(1, 2, figsize = (16, 8))
-axs[0].plot(V, P_tot, color = 'black', label = 'Total Power')
-axs[0].plot(V, P_ind, color = '#D81B60', linestyle = '--', label = 'Induced Power')
-axs[0].plot(V, P_profile, color = '#FFB000', linestyle = '--', label = 'Profile Power') 
-axs[0].plot(V, P_parasite, color = '#785EF0', linestyle = '--', label = 'Parasite Power')
-axs[0].plot(V, P_t, color = 'purple', linestyle = '--', label = 'Tail Rotor Power')
-axs[0].set_xlabel('Forward Velocity [m/s]')
+axs[0].plot(V / 0.51444, P_tot, color = 'black', label = 'Total Power')
+axs[0].plot((V / 0.51444), P_ind, color = '#D81B60', linestyle = '--', label = 'Induced Power')
+axs[0].plot((V / 0.51444), P_profile, color = '#FFB000', linestyle = '--', label = 'Profile Power') 
+axs[0].plot((V / 0.51444), P_parasite, color = '#785EF0', linestyle = '--', label = 'Parasite Power')
+axs[0].plot((V / 0.51444), P_t, color = 'purple', linestyle = '--', label = 'Tail Rotor Power')
+axs[0].set_xlabel('Forward Velocity [knots]')
 axs[0].set_ylabel('Power [MW]')
-axs[0].set_title('Power vs Forward Velocity (BEM)')
+#axs[0].set_title('Power vs Forward Velocity (BEM)')
 axs[0].legend()
 axs[0].grid()
 
-axs[1].plot(V, line, linestyle="dashed", color="orange")
-axs[1].scatter(V_best_range, P_best_range, color='orange', label="Point B", zorder=3)
-axs[1].scatter(V[P_tot.index(min(P_tot))], min(P_tot), color = '#D81B60', label = 'Point A', zorder=3)
-axs[1].plot(V, P_tot, color = 'black', label = 'Total Power')
+axs[1].plot(V / 0.51444, line, linestyle="dashed", color="orange")
+axs[1].scatter(V_best_range / 0.51444, P_best_range, color='orange', label="Point B", zorder=3)
+axs[1].scatter(V[P_tot.index(min(P_tot))] / 0.51444, min(P_tot), color = '#D81B60', label = 'Point A', zorder=3)
+axs[1].plot(V / 0.51444, P_tot, color = 'black', label = 'Total Power')
 axs[1].set_ylim(0, max(P_tot))
-axs[1].set_xlabel('Forward Velocity [m/s]')
+axs[1].set_xlabel('Forward Velocity [knots]')
 axs[1].set_ylabel('Power [MW]')
-axs[1].set_title('Power vs Forward Velocity (BEM)')
+#axs[1].set_title('Power vs Forward Velocity (BEM)')
 axs[1].legend()
 axs[1].grid()
 plt.show()
+
+print("best range velocity is: ", np.round(V_best_range/0.51444, 2), "kts")
+print("best range power is: ", np.round(P_best_range, 2), "MW")
+print("best endurance velocity is: ", np.round(V[np.argmin(P_tot)]/0.51444, 2), "kts")
+print("best endurance power is: ", np.round(np.min(P_tot), 2), "MW")
